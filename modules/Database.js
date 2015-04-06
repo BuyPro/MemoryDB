@@ -2,17 +2,32 @@
 'use strict';
 
 var Q = require("q"),
+    Collection = require("./Collection"),
     Database = function (options) {
-        var prop;
+        var prop,
+            i,
+            len,
+            table;
+
+        options = options || {};
 
         //Default properties, override in options
-        this.autoCollection = true;
+        this.autoCollection = (options.autoCollection != null && options.autoCollection) || true;
+        this.tables = {};
 
-        for (prop in options) {
-            if (options.hasOwnProperty(prop)) {
-                this[prop] = options[prop];
-            }
+        options.tables = options.tables || [];
+        len = options.tables.length;
+
+        for (i = 0; i < len; i += 1) {
+            table = options.tables[i];
+            this.tables[table.name] = new Collection(table);
         }
+
+//        for (prop in options) {
+//            if (options.hasOwnProperty(prop)) {
+//                this[prop] = options[prop];
+//            }
+//        }
 
         this.alias = {
             "create": this.create,
@@ -30,7 +45,9 @@ var Q = require("q"),
             "delete": this.remove
         };
 
-        this.create = function (params) {};
+        this.create = function (params) {
+
+        };
         this.read = function (params) {
 
         };

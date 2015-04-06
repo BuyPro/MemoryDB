@@ -1,4 +1,4 @@
-/*jslint node: true, nomen: true */
+/*jslint node: true, nomen: true, plusplus: true */
 'use strict';
 
 var Q = require("q"),
@@ -19,18 +19,33 @@ var Q = require("q"),
         },
         gte: function (b, a) {
             return a >= b;
+        },
+        fn: function (func, a) {
+            return func.call(null, a);
         }
     },
-    unwrap = function (where) {
+    filtr = function (where) {
         return function (e) {
             return operations[where.operator](where.operand, e[where.value]);
         };
+    },
+    matchAll = function (tests, data) {
+        var i,
+            len = tests.length,
+            cur;
+        for (i = 0; i < len; i += 1) {
+            cur = tests[i];
+            if (!filtr(cur)(data)) {
+                return false;   // Not returning filtr(cur)(data) directly because all
+            }                   // tests need to resolve to true to return true
+        }
+        return true;
     },
     Collection = function (options) {
         options = options || {};
 
         this.data = [];
-        this.idGen = new Sequence();
+        this.idGen = options.idGen || new Sequence();
         this.model = options.model || {};
 
         this.create = function (datum) {
@@ -41,6 +56,12 @@ var Q = require("q"),
         };
 
         this.read = function (params) {
+            //Params is optional;   naked function call will return the values
+            //                      defined in the model for all entries
+            params = params || {};
+            params.values = params.values || this.model;
+            params.where = params.where || [];
+
             var dataset = [],
                 filtered = this.data,
                 vals = params.values,
@@ -50,7 +71,7 @@ var Q = require("q"),
                 len = params.where.length;
             for (i = 0; i < len; i += 1) {
                 cur = params.where[i];
-                filtered = filtered.filter(unwrap(cur));
+                filtered = filtered.filter(filtr(cur));
             }
             len = filtered.length;
             for (i = 0; i < len; i += 1) {
@@ -63,9 +84,45 @@ var Q = require("q"),
             return {modified: dataset.length, data: dataset};
         };
 
-        this.update = function (params) {};
+        this.update = function (params) {
+            if (!params.values) {
+                throw new SyntaxError("Database update needs values to update. Provided Query: " + JSON.stringify(params));
+            }
+            if (!params.where) {
+                throw new SyntaxError("Database update needs where clause. Provided Query: " + JSON.stringify(params));
+            }
+            var i,
+                modified = 0,
+                len = this.data.length,
+                cur;
+            for (i = 0; i < len; i += 1) {
+                cur = this.data[i];
+                if (matchAll(params.where, cur)) {
+                    this.data[i] = jsn.merge(this.data[i], params.values);
+                    modified += 1;
+                }
+            }
+            return {modified: modified};
+        };
 
-        this.remove = function (params) {};
+        this.remove = function (params) {
+            var modified = 0,
+                i,
+                cur;
+            if (!params.where) {
+                modified = this.data.length;
+                this.data = [];
+            } else {
+                i = this.data.length;
+                while (i--) {
+                    if (matchAll(params.where, this.data[i])) {
+                        this.data.splice(i, 1);
+                        modified += 1;
+                    }
+                }
+            }
+            return {modified: modified};
+        };
 
     };
 
