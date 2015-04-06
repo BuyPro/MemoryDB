@@ -1,9 +1,5 @@
 /*jslint node: true */
 'use strict';
 
-module.exports = {
-    create: function (collections) {
-    },
-    Collection: require("./modules/Collection"),
-    Database: require("./modules/Database")
-};
+module.exports = require("./modules/Database");
+module.exports.Collection = require("./modules/Collection");
