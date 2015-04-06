@@ -8,7 +8,8 @@ var Q = require("q"),
         var prop,
             i,
             len,
-            table;
+            table,
+            self = this;
 
         options = options || {};
 
@@ -29,22 +30,6 @@ var Q = require("q"),
 //                this[prop] = options[prop];
 //            }
 //        }
-
-        this.alias = {
-            "create": this.create,
-            "insert": this.create,
-            "post": this.create,
-
-            "read": this.read,
-            "select": this.read,
-            "get": this.read,
-
-            "update": this.update,
-            "patch": this.update,
-
-            "remove": this.remove,
-            "delete": this.remove
-        };
 
         this.ensureTablesExist = function (tableNames) {
             var i,
@@ -107,7 +92,7 @@ var Q = require("q"),
             return queries;
         };
         this.extractQueryConditions = function (query) {
-            var where = query.where || {},
+            var where = query.where || [],
                 tables = query.tables || {},
                 keys,
                 keySplit,
@@ -177,6 +162,7 @@ var Q = require("q"),
         };
 
         this.create = function (query, callback) {
+            console.log(this);
             var queries = this.splitQueryToTables(query),
                 tables = jsn.keys(queries),
                 results = 0,
@@ -251,9 +237,26 @@ var Q = require("q"),
             }
             callback(null, {modified: results});
         };
+
+        this.alias = {
+            "create": self.create,
+            "insert": self.create,
+            "post": self.create,
+
+            "read": self.read,
+            "select": self.read,
+            "get": self.read,
+
+            "update": self.update,
+            "patch": self.update,
+
+            "remove": self.remove,
+            "delete": self.remove
+        };
+
         this.query = function (params, callback) {
             this.ensureTablesExist(params.tables);
-            return this.alias[params.type](params, callback);
+            return this.alias[params.type].bind(this)(params, callback);
         };
     };
 
