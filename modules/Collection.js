@@ -58,19 +58,19 @@ var Q = require("q"),
         this.read = function (params) {
             //Params is optional;   naked function call will return the values
             //                      defined in the model for all entries
-            params = params || {};
-            params.values = params.values || this.model;
-            params.where = params.where || [];
+            var param = params || {};
+            param.values = params.values || this.model;
+            param.where = params.where || [];
 
             var dataset = [],
                 filtered = this.data,
-                vals = params.values,
+                vals = param.values,
                 valKeys = jsn.keys(vals),
                 cur,
                 i,
-                len = params.where.length;
+                len = param.where.length;
             for (i = 0; i < len; i += 1) {
-                cur = params.where[i];
+                cur = param.where[i];
                 filtered = filtered.filter(filtr(cur));
             }
             len = filtered.length;
