@@ -58,7 +58,7 @@ var Database = require("./Database"),
         };
 
         this.where = function (condition) {
-            this.wheres.push(condition);
+            this.whereList.push(condition);
             return this;
         };
         this.wheres = function (conditions) {
