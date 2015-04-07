@@ -3,6 +3,7 @@
 
 var Q = require("q"),
     Collection = require("./Collection"),
+    Query = require("./Query"),
     jsn = require("bp-utilities").jsn,
     Database = function (options) {
         var prop,
@@ -254,10 +255,19 @@ var Q = require("q"),
             "delete": self.remove
         };
 
-        this.query = function (params, callback) {
-            this.ensureTablesExist(params.tables);
-            return this.alias[params.type].bind(this)(params, callback);
+        this.query = function (type, tables) {
+            return new Query(this, type, tables);
         };
+
+        this.exec = function (params, callback) {
+            this.ensureTablesExist(params.tables);
+            this.alias[params.type].bind(this)(params, callback);
+        };
+
+        this.Collection = Collection;
+        this.Query = Query;
+
+        return this;
     };
 
 module.exports = Database;

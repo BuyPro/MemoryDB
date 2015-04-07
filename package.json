@@ -1,6 +1,6 @@
 {
   "name": "bp-memory-db",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "An in memory data storage objejct that simulates database behaviours",
   "main": "index.js",
   "repository": {
