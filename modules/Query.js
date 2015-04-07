@@ -31,7 +31,6 @@ var Database = require("./Database"),
         this.valueObj = {};
         this.whereList = [];
         this.collationObj = {};
-        this.callbackfunc = null;
 
         this.type = function (type) {
             this.typedef = type;
