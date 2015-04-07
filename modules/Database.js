@@ -264,9 +264,6 @@ var Q = require("q"),
             this.alias[params.type].bind(this)(params, callback);
         };
 
-        this.Collection = Collection;
-        this.Query = Query;
-
         return this;
     };
 
