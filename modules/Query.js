@@ -5,9 +5,9 @@ var Database = require("./Database"),
     Q = require("q"),
     jsn = require("bp-utilities").jsn,
     Query = function (context, type, tables) {
-        if (!(context instanceof Database)) {
-            throw new ReferenceError("Query context must be a database object");
-        }
+//        if (!(context instanceof Database)) {
+//            throw new ReferenceError("Query context must be a database object");
+//        }
 
         this.context = context;
         this.defer = Q.defer();
