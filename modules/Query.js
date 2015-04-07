@@ -96,3 +96,5 @@ var Database = require("./Database"),
 
         return this;
     };
+
+module.exports = Query;
