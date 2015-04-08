@@ -63,7 +63,7 @@ var Q = require("q"),
 
             len = tables.length;
             for (i = 0; i < len; i += 1) {
-                queries[tables[i]] = {values: {}};
+                queries[tables[i]] = {};
             }
 
             keys = jsn.keys(values);
@@ -78,7 +78,7 @@ var Q = require("q"),
                     if (!queries.hasOwnProperty(cur[0])) {
                         throw new ReferenceError("Attempt to access undefined table `" + cur[0] + "` in query; " + JSON.stringify(query));
                     }
-                    queries[cur[0]].values[cur[1]] = values[keys[i]];
+                    queries[cur[0]][cur[1]] = values[keys[i]];
                 }
             }
 
@@ -86,7 +86,7 @@ var Q = require("q"),
             for (i = 0; i < len; i += 1) {
                 for (cur in queries) {
                     if (queries.hasOwnProperty(cur)) {
-                        queries[cur].values[defer[i]] = values[defer[i]];
+                        queries[cur][defer[i]] = values[defer[i]];
                     }
                 }
             }
@@ -106,7 +106,7 @@ var Q = require("q"),
 
             len = tables.length;
             for (i = 0; i < len; i += 1) {
-                queries[tables[i]] = {where: []};
+                queries[tables[i]] = [];
             }
 
             keys = where.map(function (e) {return e.value; });
@@ -121,8 +121,8 @@ var Q = require("q"),
                     if (!queries.hasOwnProperty(cur[0])) {
                         throw new ReferenceError("Attempt to access undefined table `" + cur[0] + "` in query; " + JSON.stringify(query));
                     }
-                    indx = queries[cur[0]].where.push(jsn.copy(where[i]));
-                    queries[cur[0]].where[indx - 1].value = cur[1];
+                    indx = queries[cur[0]].push(jsn.copy(where[i]));
+                    queries[cur[0]][indx - 1].value = cur[1];
                 }
             }
 
@@ -130,7 +130,7 @@ var Q = require("q"),
             for (i = 0; i < len; i += 1) {
                 for (cur in queries) {
                     if (queries.hasOwnProperty(cur)) {
-                        queries[cur].where.push(where[i]);
+                        queries[cur].push(where[i]);
                     }
                 }
             }
@@ -173,7 +173,7 @@ var Q = require("q"),
             try {
                 for (i = 0; i < len; i += 1) {
                     cur = tables[i];
-                    results += this.tables[cur].create(queries[cur]).modified;
+                    results += this.tables[cur].create(queries[cur].values).modified;
                 }
             } catch (e) {
                 callback(e, null);
@@ -185,7 +185,7 @@ var Q = require("q"),
             var queries = this.splitQueryToTables(query),
                 tables = jsn.keys(queries),
                 ret,
-                results = {},
+                results = {modified: 0},
                 i,
                 len = tables.length,
                 cur;
